@@ -23,13 +23,15 @@ def path_scanning():
         route = []
         load, travel = 0, 0
         src = information['DEPOT']
-        dist = 0
-        while uncompleted and dist != float('Inf'):
-            dist = float('Inf')
+        distance_upperbound = 0
+        while uncompleted and distance_upperbound != float('Inf'):
+            distance_upperbound = float('Inf')
+            next_task = None
             for task in uncompleted:
                 if demand[task] + load <= capacity:
-                    if distance[src][task[0]] < dist:
-                        print()
+                    if distance[src][task[0]] < distance_upperbound:
+                        distance_upperbound = distance[src][task[0]]
+
 
 if __name__ == '__main__':
     # Receive the arguments and read the file
@@ -59,4 +61,3 @@ if __name__ == '__main__':
     print(information)
     # Run Floyd's algorithm to find minimum distances of each vertices pair
     Floyd(graph_size)
-
