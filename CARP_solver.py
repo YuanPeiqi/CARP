@@ -8,9 +8,9 @@ weight = {}
 # demand[(u,v)] indicates the demand of task (u,v)
 demand = {}
 # result set for routes chosen
-route_set = []
+opt_route = []
 # cost set for routes chosen
-cost_set = []
+opt_cost = []
 
 
 def Floyd(size):
@@ -21,9 +21,33 @@ def Floyd(size):
                     distance[i][j] = distance[i][k] + distance[k][j]
 
 
-def path_scanning():
+def better(task, next_task, rule_num, current_load):
+    if next_task is None:
+        return True
+    # maximize the distance from the task to the depot
+    if rule_num == 1:
+        return distance[task[1]][1] > distance[next_task[1]][1]
+    # minimize the distance from the task to the depot
+    elif rule_num == 2:
+        return distance[task[1]][1] < distance[next_task[1]][1]
+    # maximize the term dem(t)/sc(t), where dem(t) and sc(t) are demand and serving cost of task t, respectively
+    elif rule_num == 3:
+        return demand[task]/weight[task] > demand[next_task]/weight[next_task]
+    # minimize the term dem(t)/sc(t), where dem(t) and sc(t) are demand and serving cost of task t, respectively
+    elif rule_num == 4:
+        return demand[task]/weight[task] < demand[next_task]/weight[next_task]
+    else:
+        if current_load <= int(0.5 * information['CAPACITY']):
+            return distance[task[1]][1] > distance[next_task[1]][1]
+        else:
+            return distance[task[1]][1] < distance[next_task[1]][1]
+
+
+def path_scanning(rule_num):
     capacity = information['CAPACITY']
     uncompleted = [item for item in demand.keys()]
+    cost_set = []
+    route_set = []
     while uncompleted:
         route = []
         load, cost = 0, 0
@@ -37,7 +61,7 @@ def path_scanning():
                     if distance[src][task[0]] < next_distance:
                         next_distance = distance[src][task[0]]
                         next_task = task
-                    elif distance[src][task[0]] == next_distance:
+                    elif distance[src][task[0]] == next_distance and better(task, next_task, rule_num, load):
                         next_task = task
             if next_task is not None:
                 route.append(next_task)
@@ -49,6 +73,21 @@ def path_scanning():
         cost += distance[src][1]
         cost_set.append(cost)
         route_set.append(route)
+    total_cost = 0
+    for i in cost_set:
+        total_cost += i
+    return cost_set, route_set, total_cost
+
+
+def format_print(total_cost):
+    print('s ', end='')
+    for i in range(len(opt_route)):
+        print('0,' + str(opt_route[i]).replace('[', '').replace(']', '').replace(' ', '') + ',0', end='')
+        if i != len(opt_route) - 1:
+            print(',', end='')
+        # print('Route_' + str(i) + ': ' + str(route_set[i]))
+        # print('Cost_' + str(i) + ': ' + str(cost_set[i]))
+    print('\nq ' + str(total_cost))
 
 
 if __name__ == '__main__':
@@ -79,14 +118,11 @@ if __name__ == '__main__':
 
     # Run Floyd's algorithm to find minimum distances of each vertices pair
     Floyd(graph_size)
-    path_scanning()
-    total_cost = 0
-    print('s ', end='')
-    for i in range(len(route_set)):
-        total_cost += cost_set[i]
-        print('0,' + str(route_set[i]).replace('[', '').replace(']', '').replace(' ', '') + ',0', end='')
-        if i != len(route_set) - 1:
-            print(',', end='')
-        # print('Route_' + str(i) + ': ' + str(route_set[i]))
-        # print('Cost_' + str(i) + ': ' + str(cost_set[i]))
-    print('\nq ' + str(total_cost))
+    final_cost = float('Inf')
+    for rule in range(1, 6):
+        current_cost, current_route, current_total_cost = path_scanning(rule)
+        if current_total_cost < final_cost:
+            final_cost = current_total_cost
+            opt_cost = current_cost
+            opt_route = current_route
+    format_print(final_cost)
