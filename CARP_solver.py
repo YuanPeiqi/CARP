@@ -102,112 +102,146 @@ directions will be considered when inserting the task into the “target positio
 solution will be chosen.'''
 
 
-def single_insertion():
-    delta_cost = 0
-    # Record task that need to be changed
+# def single_insertion():
+#     delta_cost = 0
+#     # Record task that need to be changed
+#     candidate_task = None
+#     # Record the route containing the task
+#     candidate_route = None
+#     # Whether the current task is flipped
+#     reverse_flag = False
+#     # Record the position to insert
+#     expected_position = None
+#     # Cost change caused by removing
+#     remove_cost = None
+#     # Cost change caused by insertion
+#     insertion_cost = None
+#
+#     for route in opt_route:
+#         for task in route:
+#             # Deep copy the current route
+#             route_copy = copy.deepcopy(route)
+#             # Add depot to both ends as the src point and des point and remove selected task, which is convenient for calculation
+#             route_copy.append((1, 1))
+#             route_copy.insert(0, (1, 1))
+#             idx = route_copy.index(task)
+#             route_copy.remove(task)
+#             current_remove_cost = (opt_route.index(route), distance[route_copy[idx - 1][1]][route_copy[idx][0]] - \
+#                                     distance[route_copy[idx - 1][1]][task[0]] - distance[task[1]][route_copy[idx][0]])
+#             # Insertion of the same route
+#             for i in range(1, len(route_copy)):
+#                 # Difference caused by removing the current task and insertion
+#                 current_delta_cost = current_remove_cost[1] + distance[route_copy[i - 1][1]][task[0]] + \
+#                                      distance[task[1]][route_copy[i][0]] - \
+#                                      distance[route_copy[i - 1][1]][route_copy[i][0]]
+#                 # Insertion of the reverse of the task
+#                 reverse_current_delta_cost = current_remove_cost[1] + distance[route_copy[i - 1][1]][task[1]] + \
+#                                              distance[task[0]][route_copy[i][0]] - \
+#                                              distance[route_copy[i - 1][1]][route_copy[i][0]]
+#                 if current_delta_cost < delta_cost:
+#                     delta_cost = current_delta_cost
+#                     remove_cost = current_remove_cost
+#                     insertion_cost = (opt_route.index(route), distance[route_copy[i - 1][1]][task[0]] + \
+#                                         distance[task[1]][route_copy[i][0]] - distance[route_copy[i - 1][1]][route_copy[i][0]])
+#                     candidate_task = task
+#                     candidate_route = route
+#                     expected_position = (opt_route.index(route), i - 1)
+#                     reverse_flag = False
+#                 if reverse_current_delta_cost < delta_cost:
+#                     delta_cost = reverse_current_delta_cost
+#                     remove_cost = current_remove_cost
+#                     insertion_cost = (opt_route.index(route), distance[route_copy[i - 1][1]][task[1]] + \
+#                                         distance[task[0]][route_copy[i][0]] - distance[route_copy[i - 1][1]][route_copy[i][0]])
+#                     candidate_task = task
+#                     candidate_route = route
+#                     expected_position = (opt_route.index(route), i - 1)
+#                     reverse_flag = True
+#
+#             # Insertion of different route
+#             for i in range(len(opt_route)):
+#                 # If another route is not the current route and the load does not exceeds capacity, then continue
+#                 if opt_route[i] != route and opt_load[i] + demand[task] <= information['CAPACITY']:
+#                     another_route_copy = copy.deepcopy(opt_route[i])
+#                     another_route_copy.append((1, 1))
+#                     another_route_copy.insert(0, (1, 1))
+#                     for j in range(1, len(another_route_copy)):
+#                         current_delta_cost = current_remove_cost[1] + distance[another_route_copy[j - 1][1]][task[0]] + \
+#                                              distance[task[1]][another_route_copy[j][0]] - \
+#                                              distance[another_route_copy[j - 1][1]][another_route_copy[j][0]]
+#                         reverse_current_delta_cost = current_remove_cost[1] + distance[another_route_copy[j - 1][1]][task[1]] + \
+#                                                      distance[task[0]][another_route_copy[j][0]] - \
+#                                                      distance[another_route_copy[j - 1][1]][another_route_copy[j][0]]
+#                         if current_delta_cost < delta_cost:
+#                             delta_cost = current_delta_cost
+#                             remove_cost = current_remove_cost
+#                             insertion_cost = (i, distance[another_route_copy[j - 1][1]][task[0]] + \
+#                                                     distance[task[1]][another_route_copy[j][0]] - \
+#                                                     distance[another_route_copy[j - 1][1]][another_route_copy[j][0]])
+#                             candidate_task = task
+#                             candidate_route = route
+#                             expected_position = (i, j - 1)
+#                             reverse_flag = False
+#                         if reverse_current_delta_cost < delta_cost:
+#                             delta_cost = reverse_current_delta_cost
+#                             remove_cost = current_remove_cost
+#                             insertion_cost = (i, distance[another_route_copy[j - 1][1]][task[1]] + \
+#                                                     distance[task[0]][another_route_copy[j][0]] - \
+#                                                     distance[another_route_copy[j - 1][1]][another_route_copy[j][0]])
+#                             candidate_task = task
+#                             candidate_route = route
+#                             expected_position = (i, j - 1)
+#                             reverse_flag = True
+#     if candidate_task:
+#         candidate_route.remove(candidate_task)
+#         opt_cost[remove_cost[0]] += remove_cost[1]
+#         opt_cost[insertion_cost[0]] += insertion_cost[1]
+#         opt_load[remove_cost[0]] -= demand[candidate_task]
+#         opt_load[insertion_cost[0]] += demand[candidate_task]
+#         if reverse_flag:
+#             opt_route[expected_position[0]].insert(expected_position[1], (candidate_task[1], candidate_task[0]))
+#         else:
+#             opt_route[expected_position[0]].insert(expected_position[1], candidate_task)
+
+
+def single_insertion(a, b):
+    count = 0
     candidate_task = None
-    # Record the route containing the task
-    candidate_route = None
-    # Whether the current task is flipped
-    reverse_flag = False
-    # Record the position to insert
-    expected_position = None
-    # Cost change caused by removing
-    remove_cost = None
-    # Cost change caused by insertion
-    insertion_cost = None
-
-    for route in opt_route:
-        for task in route:
-            # Deep copy the current route
-            route_copy = copy.deepcopy(route)
-            # Add depot to both ends as the src point and des point and remove selected task, which is convenient for calculation
-            route_copy.append((1, 1))
-            route_copy.insert(0, (1, 1))
-            idx = route_copy.index(task)
-            route_copy.remove(task)
-            current_remove_cost = (opt_route.index(route), distance[route_copy[idx - 1][1]][route_copy[idx][0]] - \
-                                    distance[route_copy[idx - 1][1]][task[0]] - distance[task[1]][route_copy[idx][0]])
-            # Insertion of the same route
-            for i in range(1, len(route_copy)):
-                # Difference caused by removing the current task and insertion
-                current_delta_cost = current_remove_cost[1] + distance[route_copy[i - 1][1]][task[0]] + \
-                                     distance[task[1]][route_copy[i][0]] - \
-                                     distance[route_copy[i - 1][1]][route_copy[i][0]]
-                # Insertion of the reverse of the task
-                reverse_current_delta_cost = current_remove_cost[1] + distance[route_copy[i - 1][1]][task[1]] + \
-                                             distance[task[0]][route_copy[i][0]] - \
-                                             distance[route_copy[i - 1][1]][route_copy[i][0]]
-                if current_delta_cost < delta_cost:
-                    delta_cost = current_delta_cost
-                    remove_cost = current_remove_cost
-                    insertion_cost = (opt_route.index(route), distance[route_copy[i - 1][1]][task[0]] + \
-                                        distance[task[1]][route_copy[i][0]] - distance[route_copy[i - 1][1]][route_copy[i][0]])
-                    candidate_task = task
-                    candidate_route = route
-                    expected_position = (opt_route.index(route), i - 1)
-                    reverse_flag = False
-                if reverse_current_delta_cost < delta_cost:
-                    delta_cost = reverse_current_delta_cost
-                    remove_cost = current_remove_cost
-                    insertion_cost = (opt_route.index(route), distance[route_copy[i - 1][1]][task[1]] + \
-                                        distance[task[0]][route_copy[i][0]] - distance[route_copy[i - 1][1]][route_copy[i][0]])
-                    candidate_task = task
-                    candidate_route = route
-                    expected_position = (opt_route.index(route), i - 1)
-                    reverse_flag = True
-
-            # Insertion of different route
-            for i in range(len(opt_route)):
-                # If another route is not the current route and the load does not exceeds capacity, then continue
-                if opt_route[i] != route and opt_load[i] + demand[task] <= information['CAPACITY']:
-                    another_route_copy = copy.deepcopy(opt_route[i])
-                    another_route_copy.append((1, 1))
-                    another_route_copy.insert(0, (1, 1))
-                    for j in range(1, len(another_route_copy)):
-                        current_delta_cost = current_remove_cost[1] + distance[another_route_copy[j - 1][1]][task[0]] + \
-                                             distance[task[1]][another_route_copy[j][0]] - \
-                                             distance[another_route_copy[j - 1][1]][another_route_copy[j][0]]
-                        reverse_current_delta_cost = current_remove_cost[1] + distance[another_route_copy[j - 1][1]][task[1]] + \
-                                                     distance[task[0]][another_route_copy[j][0]] - \
-                                                     distance[another_route_copy[j - 1][1]][another_route_copy[j][0]]
-                        if current_delta_cost < delta_cost:
-                            delta_cost = current_delta_cost
-                            remove_cost = current_remove_cost
-                            insertion_cost = (i, distance[another_route_copy[j - 1][1]][task[0]] + \
-                                                    distance[task[1]][another_route_copy[j][0]] - \
-                                                    distance[another_route_copy[j - 1][1]][another_route_copy[j][0]])
-                            candidate_task = task
-                            candidate_route = route
-                            expected_position = (i, j - 1)
-                            reverse_flag = False
-                        if reverse_current_delta_cost < delta_cost:
-                            delta_cost = reverse_current_delta_cost
-                            remove_cost = current_remove_cost
-                            insertion_cost = (i, distance[another_route_copy[j - 1][1]][task[1]] + \
-                                                    distance[task[0]][another_route_copy[j][0]] - \
-                                                    distance[another_route_copy[j - 1][1]][another_route_copy[j][0]])
-                            candidate_task = task
-                            candidate_route = route
-                            expected_position = (i, j - 1)
-                            reverse_flag = True
-    if candidate_task:
-        candidate_route.remove(candidate_task)
-        opt_cost[remove_cost[0]] += remove_cost[1]
-        opt_cost[insertion_cost[0]] += insertion_cost[1]
-        opt_load[remove_cost[0]] -= demand[candidate_task]
-        opt_load[insertion_cost[0]] += demand[candidate_task]
-        if reverse_flag:
-            opt_route[expected_position[0]].insert(expected_position[1], (candidate_task[1], candidate_task[0]))
-        else:
-            opt_route[expected_position[0]].insert(expected_position[1], candidate_task)
+    origin_pos = None
+    target_pos = None
+    for i in range(len(opt_route)):
+        for j in range(len(opt_route[i])):
+            if count == a:
+                candidate_task = opt_route[i][j]
+                origin_pos = (i, j)
+            if count == b:
+                target_pos = (i, j)
+            count += 1
+    route_copy = copy.deepcopy(opt_route[origin_pos[0]])
+    route_copy.insert(0, (1, 1))
+    route_copy.append((1, 1))
+    target_copy = copy.deepcopy(opt_route[target_pos[0]])
+    target_copy.insert(0, (1, 1))
+    target_copy.append((1, 1))
+    # 原位置为origin_pos[1] + 1，左一个为origin_pos[1]，右一个为origin_pos[1] + 2，左一个的end连右一个的start
+    delta_cost_origin = distance[route_copy[origin_pos[1]][1]][route_copy[origin_pos[1] + 2][0]] - \
+        distance[route_copy[origin_pos[1]][1]][candidate_task[0]] - distance[candidate_task[1]][route_copy[origin_pos[1] + 2][0]] - weight[candidate_task]
+    delta_cost_target = distance[target_copy[target_pos[1]][1]][candidate_task[0]] + distance[candidate_task[1]][target_copy[target_pos[1] + 1][0]] -\
+        distance[target_copy[target_pos[1]][1]][target_copy[target_pos[1] + 1][0]] + weight[candidate_task]
+    if delta_cost_origin + delta_cost_target < 0 and opt_load[target_pos[0]] + demand[candidate_task] <= information['CAPACITY']:
+        opt_route[origin_pos[0]].remove(candidate_task)
+        opt_route[target_pos[0]].insert(target_pos[1], candidate_task)
+        opt_load[target_pos[0]] += demand[candidate_task]
+        opt_load[origin_pos[0]] -= demand[candidate_task]
+        opt_cost[target_pos[0]] += delta_cost_target
+        opt_cost[origin_pos[0]] += delta_cost_origin
 
 
 if __name__ == '__main__':
     # Receive the arguments and read the file
     file_path = sys.argv[1]
     termination = sys.argv[3]
-    seed = sys.argv[5]
+    seed = int(sys.argv[5])
+    np.random.seed(seed)
     instance_file = open(file_path, mode='r', newline='')
     content = instance_file.readlines()
     instance_file.close()
@@ -215,6 +249,8 @@ if __name__ == '__main__':
     # Store the information of graph given by the file
     information = {content[i].replace('\n', '').split(' : ')[0]: int(content[i].replace('\n', '').split(' : ')[1]) for i
                    in range(1, 8)}
+    # obtain a series of random number
+    random_list = np.random.choice(range(information['REQUIRED EDGES']), (2000000,))
 
     # Get the graph data
     graph_size = information['VERTICES'] + 1
@@ -238,6 +274,29 @@ if __name__ == '__main__':
             final_cost = current_total_cost
             opt_cost = current_cost
             opt_route = current_route
-    for _ in range(1000):
-        single_insertion()
+
+    for i in range(20000):
+        single_insertion(random_list[i], random_list[i + 20000])
+    # final_cost = 0
+    # for i in range(len(opt_cost)):
+    #     print('Load: ', opt_load[i])
+    #     print('Cost: ', opt_cost[i])
+    #     print(len(opt_route[i]))
+    #     cost_real = 0
+    #     for j in range(len(opt_route[i])):
+    #         cost_real += weight[opt_route[i][j]]
+    #         if j == 0:
+    #             cost_real += distance[1][opt_route[i][j][0]]
+    #             if j == len(opt_route[i]) - 1:
+    #                 cost_real += distance[opt_route[i][j][1]][0]
+    #         elif j == len(opt_route[i]) - 1:
+    #             cost_real += distance[opt_route[i][j][1]][1] + distance[opt_route[i][j-1][1]][opt_route[i][j][0]]
+    #         else:
+    #             cost_real += distance[opt_route[i][j - 1][1]][opt_route[i][j][0]]
+    #     print('Cost real: ', cost_real)
+    #     final_cost += cost_real
+    # print(final_cost)
+    for i in range(len(opt_route)):
+        print("Load: ", opt_load[i])
+        print("Cost: ", opt_cost[i])
     format_print()
